@@ -38,14 +38,14 @@ int get_dist(){
 
   measured_dist = sensor.readRangeSingleMillimeters();
 
-  if (measured_dist <= 85)
+  if (measured_dist <= 50)
   {
     interrupt = true; 
     // Serial.print(measured_dist); 
     // Serial.println("End of track reached!"); 
   }
 
-  if (measured_dist > 4000) //input max reading of sensor here 
+  if (measured_dist > 2000) //input max reading of sensor here 
   {
     interrupt = true; 
     // Serial.print(measured_dist); 
