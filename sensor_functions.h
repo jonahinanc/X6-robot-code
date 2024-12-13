@@ -45,7 +45,7 @@ int get_dist(){
     // Serial.println("End of track reached!"); 
   }
 
-  if (measured_dist > 2000) //input max reading of sensor here 
+  if (measured_dist > 8000) //input max reading of sensor here 
   {
     interrupt = true; 
     // Serial.print(measured_dist); 

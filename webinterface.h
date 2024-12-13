@@ -80,6 +80,9 @@ void handle_root(){
   html += "Hind leg center:<input type='text' name='hind center' value='";
   html += hind_leg_center;
   html += "'><BR>";
+  html += "Wrist offset:<input type='text' name='wrist offset' value='";
+  html += wrist_offset;
+  html += "'><BR>";
   html += "Dynamics:<input type='text' name='function_input' value='";
   html += dynamic;
   html += "'><BR>";
@@ -160,6 +163,10 @@ void handle_root(){
       if (server.argName(i) == "hind center") {
 
         hind_leg_center = server.arg(i).toInt();
+      }
+      if (server.argName(i) == "wrist offset") {
+
+        wrist_offset = server.arg(i).toInt();
       }
     }
 
