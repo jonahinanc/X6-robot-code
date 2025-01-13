@@ -41,9 +41,9 @@ void setup() {
 
     hsp.setPeriodHertz(60);
     fsp.setPeriodHertz(60);
-
-    hsp.attach(h_s, savoex_spine_min, savoex_spine_max);
-    fsp.attach(f_s, savoex_spine_min, savoex_spine_max);
+// change to B130 or NEEBRC min and max
+    hsp.attach(h_s, b130_servo_min, b130_servo_max);
+    fsp.attach(f_s, b130_servo_min, b130_servo_max);
     delay(10);
 
   // Current sensor

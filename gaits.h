@@ -27,6 +27,10 @@
 #define dms_feedback_min 3076 //30 degrees 
 #define dms_feedback_max 1612 //150 degrees 
 
+//Define Max and Min Pulsewidth of B130 (Spine) --> change to NEEBRC in case that one is used
+#define b130_servo_min 1880
+#define b130_servo_max 580
+
 //Define Motor Slot Number on PCA9685 (Servo Shield)
 const int rff = 15; // right front foot 
 const int lfs = 11; //left front shoulder
@@ -170,7 +174,7 @@ static int hh_lha = 83; //Hind left Wrist Angle
 int h_lha = hh_lha; 
 static int hh_rha = 66; //Hind right Wrist Angle
 int h_rha = hh_rha;
-static int hh_lfsa = 90; // left front shoulder abduction
+static int hh_lfsa = 95; // left front shoulder abduction
 int h_lfsa = hh_lfsa;
 static int hh_rfsa = 113; // right front shoulder abduction
 int h_rfsa = hh_rfsa;
@@ -772,9 +776,9 @@ void move_motor(int motor_num, int angle){
     // Serial.println(angle); 
   }
 
-    // Spine
+    // Spine --> change to b130 or neebrc min and max with correct angles
 else if (motor_num == 25){
-    pulsewidth = map(angle, 30, 150, savoex_spine_min, savoex_spine_max);
+    pulsewidth = map(angle, 30, 150, b130_servo_min, b130_servo_max);
     hsp.writeMicroseconds(pulsewidth);
     // Serial.print("Spine angle: "); 
     // Serial.println(motor_num);
@@ -785,7 +789,7 @@ else if (motor_num == 25){
 }
 
 else {
-    pulsewidth = map(angle, 30, 150, savoex_spine_min, savoex_spine_max);
+    pulsewidth = map(angle, 30, 150, b130_servo_min, b130_servo_max);
     fsp.writeMicroseconds(pulsewidth);
     // Serial.print("Servo Num Savoex: "); 
     // Serial.println(motor_num);
