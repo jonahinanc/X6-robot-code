@@ -5,20 +5,21 @@
 #include <ESP32Servo.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
-#include <VL53L0X.h>  //time of flight distance sensor
 #include <MPU6050_tockn.h>  //gyro
-#include "DFRobot_INA219.h"
+#include <Adafruit_INA260.h>
+#include <Adafruit_VL53L1X.h>
 // #include <Adafruit_INA219.h> //Current Sensor
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 MPU6050 mpu6050(Wire);
-VL53L0X sensor;
+Adafruit_VL53L1X vl53 = Adafruit_VL53L1X();
 // Adafruit_INA219 ina219(0x41); //assign unique address, A0(0x41) or A1(0x44) is bridged on the board!
-DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4);
+// DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4);
+Adafruit_INA260 ina260 = Adafruit_INA260();
 
 // Revise the following two paramters according to actual reading of the INA219 and the multimeter
 // for linearly calibration
-float ina219Reading_mA = 1000;
+float ina260Reading_mA = 1000;
 float extMeterReading_mA = 1000;
 
 float y_ang_offset = 0.0, z_ang_offset = 0.0, x_acc_offset = 0.0, y_acc_offset = 0.0, z_acc_offset = 0.0;  
@@ -29,47 +30,44 @@ int get_dist();
 float get_current(); 
 float get_accel(int val); 
 
-int get_dist(){ 
-
-  int measured_dist; 
+int get_dist(){
+  int measured_dist;
   int sample_size = 10;
-  int sum = 0;  
-  int mean_dist; 
-
-  measured_dist = sensor.readRangeSingleMillimeters();
-
-  if (measured_dist <= 50)
+  int sum = 0;
+  int mean_dist;
+  measured_dist = vl53.distance();
+  Serial.println(measured_dist);
+  if (measured_dist <= 230 && measured_dist > 0)
   {
-    interrupt = true; 
-    // Serial.print(measured_dist); 
-    // Serial.println("End of track reached!"); 
-  }
-
-  if (measured_dist > 8000) //input max reading of sensor here 
+    interrupt = true;
+    Serial.println(measured_dist);
+    Serial.println("End of track reached!");
+  } 
+  if (measured_dist == -1) //input max reading of sensor here/fall value
   {
-    interrupt = true; 
-    // Serial.print(measured_dist); 
-    // Serial.println("Distance sensor read max!"); 
+    interrupt = true;
+    Serial.println(measured_dist);
+    Serial.println("Distance sensor read max!");
     measured_dist = 9999;
     return measured_dist;
   }
-
   for (size_t i = 0; i < sample_size; i++)
   {
-    sum += sensor.readRangeSingleMillimeters();
+    sum += vl53.distance();
     delay(1);
   }
-
-  mean_dist = sum / sample_size; 
+  mean_dist = sum / sample_size;
   return mean_dist;
 }
 
 float get_current()
 {
     float current;
-    current = -(ina219.getCurrent_mA());
+    //current = -(ina219.getCurrent_mA());
+    current = ina260.readCurrent();
     return current;
 }
+
 
 float get_accel(int val){ 
   mpu6050.update();

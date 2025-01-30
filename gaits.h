@@ -31,6 +31,10 @@
 #define b130_servo_min 1880
 #define b130_servo_max 580
 
+//Define Max and Min Pulsewidth of NEEBRC
+#define neebrc_servo_min 2400 // 33°
+#define neebrc_servo_max 600 // 203°
+
 //Define Motor Slot Number on PCA9685 (Servo Shield)
 const int rff = 15; // right front foot 
 const int lfs = 11; //left front shoulder
@@ -52,8 +56,8 @@ const int rhsa = 7; // right hind shoulder abduction
 // Define GPIOs on ESP
 Servo hsp;
 Servo fsp;
-const int f_s = 27; //front spine 
-const int h_s = 25; //hind spine 
+const int f_s = 25; //front spine 
+const int h_s = 27; //hind spine 
 
 //Define Feedback pins for Servos 
 const int f_s_feed = GPIO_NUM_34; //front spine 
@@ -68,7 +72,7 @@ const int lhf_feed = GPIO_NUM_36;
 //Input Variables for motion --> adjustable in web interface  
 int shoulder_angle = 0; // shoulder angle that fits onto the diameter
 int rom_spine = 10; //range of motion of spine
-int rom_limb = 10; //range of motion of legs 
+int rom_limb = 20; //range of motion of legs 
 int rom_feet = 75; //range of motion of feet 
 int rom_shoulders = 10; // range of motion of shoulders
 int dynamic = 1; //defines which dynamic to use (1 = sigmoid, 2 = sinusoid) 
@@ -90,8 +94,8 @@ int rom_wrist_angle = rom_spine + rom_limb;
 
 //information variables  
 int climb_incline = 90;
-String claw_angle = "10", surface = "coarse_carpet", toe_angle = "0", robot = "X5_Mini";
-float leg_length = 72.5, spine_length = 169.5, spine_middle = 69.5, should_offset = 45; 
+String claw_angle = "10", surface = "coarse_carpet", toe_angle = "0", robot = "X6";
+float leg_length = 72.5, spine_length = 187.5, spine_middle = 87.5, should_offset = 45; 
 float spine_front = (spine_length - spine_middle) / 2;
 
 //Variables for Data Collection 
@@ -148,17 +152,17 @@ void gait1();
 int sensor_to_angle(int motor_num, int feedback_pin); // convert sensor reading to angle 
 
 //Home Positions of Servos (hh offset home position, h = position after change via webpage)
-static int hh_lff = 86; //Front left foot
+static int hh_lff = 80; //Front left foot
 int h_lff = hh_lff; 
-static int hh_lfs = 108; //Front left shoulder 
+static int hh_lfs = 105; //Front left shoulder 
 int h_lfs = hh_lfs; 
-static int hh_rfs = 96; //Front right shoulder
+static int hh_rfs = 98; //Front right shoulder
 int h_rfs = hh_rfs; 
 static int hh_rff = 80; //Front right foot
 int h_rff = hh_rff; 
-static int h_fs = 126; //Spine Front change to 90
-static int h_hs = 116; //Spine Hind change to 90
-static int hh_rhf = 75; //Hind right foot
+static int h_fs = 106; //Spine Front change to 90
+static int h_hs = 175; //Spine Hind change to 90
+static int hh_rhf = 67; //Hind right foot
 int h_rhf = hh_rhf; 
 static int hh_rhs = 76; //Hind right shoulder
 int h_rhs = hh_rhs; 
@@ -174,13 +178,13 @@ static int hh_lha = 83; //Hind left Wrist Angle
 int h_lha = hh_lha; 
 static int hh_rha = 66; //Hind right Wrist Angle
 int h_rha = hh_rha;
-static int hh_lfsa = 95; // left front shoulder abduction
+static int hh_lfsa = 102; // left front shoulder abduction
 int h_lfsa = hh_lfsa;
-static int hh_rfsa = 113; // right front shoulder abduction
+static int hh_rfsa = 111; // right front shoulder abduction
 int h_rfsa = hh_rfsa;
-static int hh_lhsa = 88; // left hind shoulder abduction
+static int hh_lhsa = 82; // left hind shoulder abduction
 int h_lhsa = hh_lhsa;
-static int hh_rhsa = 115; // right hind shoulder abudction
+static int hh_rhsa = 120; // right hind shoulder abudction
 int h_rhsa = hh_rhsa;
 
 void gait1()
@@ -343,7 +347,7 @@ void gait1()
                 //Serial.println(rom_spine + rom_limb - dynamic_movement_spine(i) - dynamic_movement_legs(i));
             }
 
-            if (i == 9 || i == 18 || i == 27 || i == 36 || i == 45) // get current/accel equally spaced throughout 50 increments
+            if (i == 9 || i == 18 || i == 25 || i == 36 || i == 45) // get current/accel equally spaced throughout 50 increments
             {
                 current_during_stride[curr_index] = get_current(); // index 0-4
 
@@ -378,7 +382,7 @@ void gait1()
         //delay(3000);
 
         int measured_dist;
-        measured_dist = sensor.readRangeSingleMillimeters();
+        measured_dist = vl53.distance();
 
         get_dist(); // to detect if end of track/fall mid stride
         if (interrupt == true)
@@ -462,7 +466,7 @@ void gait1()
                 //Serial.println(+ rom_limb + rom_spine - dynamic_movement_legs(i) - dynamic_movement_spine(i));
             }
 
-            if (i == 9 || i == 18 || i == 27 || i == 36 || i == 45)
+            if (i == 9 || i == 18 || i == 5 || i == 36 || i == 45)
             {
 
                 current_during_stride[curr_index] = get_current(); // index 5 - 9
@@ -777,21 +781,21 @@ void move_motor(int motor_num, int angle){
   }
 
     // Spine --> change to b130 or neebrc min and max with correct angles
-else if (motor_num == 25){
-    pulsewidth = map(angle, 30, 150, b130_servo_min, b130_servo_max);
+else if (motor_num == 27){
+    pulsewidth = map(angle, 33, 203, neebrc_servo_min, neebrc_servo_max);
     hsp.writeMicroseconds(pulsewidth);
-    // Serial.print("Spine angle: "); 
-    // Serial.println(motor_num);
+/*     Serial.print("Spine angle: "); 
+    Serial.println(motor_num); */
     // Serial.print("Angle: ");   
     // Serial.println(angle); 
     // Serial.print("spine pulsewidth: "); 
-    // Serial.println(pulsewidth); 
+    //Serial.println(pulsewidth); 
 }
 
 else {
-    pulsewidth = map(angle, 30, 150, b130_servo_min, b130_servo_max);
+    pulsewidth = map(angle, 33, 203, neebrc_servo_min, neebrc_servo_max);
     fsp.writeMicroseconds(pulsewidth);
-    // Serial.print("Servo Num Savoex: "); 
+   // Serial.print("Servo Num Savoex: "); 
     // Serial.println(motor_num);
     // Serial.print("Angle: ");   
     // Serial.println(angle); 
@@ -921,7 +925,7 @@ int sensor_to_angle(int motor_num, int feedback_pin){
   }
 
 // Spine
-  else if( motor_num == 25 || motor_num == 27){
+  else if( motor_num == 27 || motor_num == 25){
     angle = map(feedback_val, savoex_feedback_min, savoex_feedback_max, 30, 150); 
     // Serial.print("Servo Num Savoex: "); 
     // Serial.println(motor_num);
